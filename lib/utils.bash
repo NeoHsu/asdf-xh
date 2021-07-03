@@ -40,9 +40,15 @@ download_release() {
   local version filename url
   version="$1"
   filename="$2"
+  platform=$(get_platform)
+  arch=$(get_arch)
 
-  # TODO: Adapt the release URL convention for xh
-  url="$GH_REPO/archive/v${version}.tar.gz"
+  if [ "$platform" == "darwin" ]; then
+    arch="x86_64"
+  fi
+
+  download_file=$(curl -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/ducaale/xh/releases/tags/v${version}" | grep "name" | grep "xh-v${version}" | awk '{print $2}' | grep -i "$platform" | grep -i "$arch" | sed -e 's/\"//g' | sed -e 's/,//g')
+  url="https://github.com/ducaale/xh/releases/download/v${version}/$download_file"
 
   echo "* Downloading $TOOL_NAME release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
@@ -58,10 +64,15 @@ install_version() {
   fi
 
   (
-    mkdir -p "$install_path"
-    cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
+    platform=$(get_platform)
+    ext=""
+    if [ "$platform" == "windows" ]; then
+      ext=".exe"
+    fi
 
-    # TODO: Asert xh executable exists.
+    mkdir -p "$install_path/bin"
+    cp "$ASDF_DOWNLOAD_PATH/$TOOL_NAME$ext" "$install_path/bin/$TOOL_NAME$ext"
+  
     local tool_cmd
     tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
     test -x "$install_path/bin/$tool_cmd" || fail "Expected $install_path/bin/$tool_cmd to be executable."
@@ -71,4 +82,33 @@ install_version() {
     rm -rf "$install_path"
     fail "An error ocurred while installing $TOOL_NAME $version."
   )
+}
+
+get_arch() {
+  local arch=""
+
+  case "$(uname -m)" in
+    x86_64 | amd64) arch="x86_64" ;;
+    armv6l | armv7l | aarch64 | arm64) arch="arm" ;;
+    *)
+      fail "Arch '$(uname -m)' not supported!"
+      ;;
+  esac
+
+  echo -n $arch
+}
+
+get_platform() {
+  local platform=""
+
+  case "$(uname | tr '[:upper:]' '[:lower:]')" in
+    darwin) platform="darwin" ;;
+    linux) platform="linux" ;;
+    windows) platform="windows" ;;
+    *)
+      fail "Platform '$(uname -m)' not supported!"
+      ;;
+  esac
+
+  echo -n $platform
 }
