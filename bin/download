@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# shellcheck source=../lib/utils.bash
+# shellcheck source=lib/utils.bash
 source "$(dirname "$0")/../lib/utils.bash"
 
 mkdir -p "$ASDF_DOWNLOAD_PATH"
@@ -23,7 +23,7 @@ case $platform in
     ;;
   *)
     tar zxvf "$release_file" -C "$ASDF_DOWNLOAD_PATH" >/dev/null || fail "Could not uncompress"
-    mv -i $ASDF_DOWNLOAD_PATH/*/* $ASDF_DOWNLOAD_PATH
+    mv -i "$ASDF_DOWNLOAD_PATH/*/*" "$ASDF_DOWNLOAD_PATH"
     ;;
 esac
 
