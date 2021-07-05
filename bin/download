@@ -22,8 +22,7 @@ case $platform in
     unzip "$release_file" -d "$ASDF_DOWNLOAD_PATH" || fail "Could not uncompress"
     ;;
   *)
-    tar zxvf "$release_file" -C "$ASDF_DOWNLOAD_PATH" >/dev/null || fail "Could not uncompress"
-    mv -i "$ASDF_DOWNLOAD_PATH/*/*" "$ASDF_DOWNLOAD_PATH"
+    tar zxvf "$release_file" --strip-components=1 -C "$ASDF_DOWNLOAD_PATH" >/dev/null || fail "Could not uncompress"
     ;;
 esac
 
