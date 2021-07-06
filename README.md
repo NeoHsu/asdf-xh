@@ -6,6 +6,10 @@
 
 </div>
 
+# Build History
+
+[![Build history](https://buildstats.info/github/chart/NeoHsu/asdf-xh?branch=master)](https://github.com/NeoHsu/asdf-xh/actions)
+
 # Contents
 
 - [Dependencies](#dependencies)
